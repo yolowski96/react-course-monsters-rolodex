@@ -1,45 +1,41 @@
+import { useState, useEffect } from 'react';
+
 import CardList from './components/card-list/card-list';
 import SearchBox from './components/search-box/search-box';
 import './App.css';
-import { Component } from 'react';
 
-class App extends Component {
+const App = () => {
 
-  constructor() {
-    super();
+  const [searchField, setSearchField] = useState('');
+  const [monsters, setMonsters] = useState([]);
+  const [filteredMonsters, setFilteredMonsters] = useState(monsters);
 
-    this.state = {
-      monsters: [],
-      searchingValue: ''
-    }
-  };
-
-  componentDidMount() {
+  useEffect(() => {
     fetch('https://jsonplaceholder.typicode.com/users')
       .then((response) => response.json())
-      .then((users) => this.setState(
-        () => {
-          return { monsters: users }
-        }
-      ))
-  }
+      .then((users) => setMonsters(users));
+  },[])
 
-  onSearchChange = (event) => {
+  useEffect(() => {
+    const newFilterMonsters = monsters.filter((monster) => monster.name.toLowerCase().includes(searchField));
+
+    setFilteredMonsters(newFilterMonsters);
+
+  },[monsters, searchField])
+
+  const onSearchChange = (event) => {
     const searchingValue = event.target.value.toLowerCase();
-
-    this.setState(() => { return { searchingValue } })
+    setSearchField(searchingValue);
   };
 
-  render() {
-    const filterMonsters = this.state.monsters.filter((monster) => monster.name.toLowerCase().includes(this.state.searchingValue));
-    return (
-      <div className="App">
-        <h1 className='app-title'>Monsters Rolodex</h1>
-        < SearchBox className='monsters-search-box' placeholder='search monsters' onChangeHandler={this.onSearchChange} />
-        < CardList monsters={filterMonsters} />
-      </div>
-    );
-  }
+  return (
+    <div className="App">
+      <h1 className='app-title'>Monsters Rolodex</h1>
+      < SearchBox className='monsters-search-box' placeholder='search monsters' onChangeHandler={onSearchChange} />
+      < CardList monsters={filteredMonsters} />
+    </div>
+  );
+
 }
 
 export default App;
